@@ -6,6 +6,10 @@
     <title>Libre Creation - منصة الإبداع الحر</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=Cairo:wght@400;600;700&family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -152,6 +156,24 @@
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <!-- Firebase Configuration -->
+    <script>
+        // تكوين Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBkQZ80XlWJx5V9L2qR7m3n4p6s8t9w0x1",
+            authDomain: "libre-creation-db.firebaseapp.com",
+            projectId: "libre-creation-db",
+            storageBucket: "libre-creation-db.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef1234567890abcdef"
+        };
+
+        // تهيئة Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+
+    <script src="script-firebase.js"></script>
 </body>
 </html>
