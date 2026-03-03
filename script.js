@@ -271,6 +271,14 @@ function updateUI() {
 
 // وظيفة عرض الإشعارات
 function showNotification(message) {
+    // إزالة أي إشعارات موجودة
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notification => {
+        if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
+        }
+    });
+    
     // إنشاء عنصر الإشعار
     const notification = document.createElement('div');
     notification.className = 'notification';
@@ -289,6 +297,8 @@ function showNotification(message) {
         transform: translateX(100%);
         transition: all 0.3s ease-out;
         font-weight: 600;
+        max-width: 300px;
+        text-align: center;
     `;
     
     document.body.appendChild(notification);
@@ -304,7 +314,9 @@ function showNotification(message) {
         notification.style.opacity = '0';
         notification.style.transform = 'translateX(100%)';
         setTimeout(() => {
-            document.body.removeChild(notification);
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
         }, 300);
     }, 3000);
 }
@@ -339,7 +351,13 @@ function showLoginModal() {
         
         if (result.success) {
             showNotification(result.message);
-            closeModal(modal.querySelector('.modal-close'));
+            // إغلاق النافذة بطريقة آمنة
+            setTimeout(() => {
+                const closeBtn = modal.querySelector('.modal-close');
+                if (closeBtn) {
+                    closeModal(closeBtn);
+                }
+            }, 1000);
             updateUI();
         } else {
             showNotification(result.message);
@@ -407,7 +425,13 @@ function showSignupModal() {
         
         if (result.success) {
             showNotification(result.message);
-            closeModal(modal.querySelector('.modal-close'));
+            // إغلاق النافذة بطريقة آمنة
+            setTimeout(() => {
+                const closeBtn = modal.querySelector('.modal-close');
+                if (closeBtn) {
+                    closeModal(closeBtn);
+                }
+            }, 1000);
             updateUI();
         } else {
             showNotification(result.message);
@@ -731,9 +755,27 @@ function createModal(title, content) {
 // وظيفة إغلاق النوافذ المنبثقة
 function closeModal(button) {
     const modal = button.closest('.modal-overlay');
-    modal.style.opacity = '0';
-    modal.querySelector('.modal').style.transform = 'scale(0.8)';
-    setTimeout(() => {
-        document.body.removeChild(modal);
-    }, 300);
+    if (modal) {
+        modal.style.opacity = '0';
+        modal.querySelector('.modal').style.transform = 'scale(0.8)';
+        setTimeout(() => {
+            if (document.body.contains(modal)) {
+                document.body.removeChild(modal);
+            }
+        }, 300);
+    }
+}
+
+// وظيفة إغلاق النافذة بالمعرف
+function closeModalById(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.opacity = '0';
+        modal.querySelector('.modal').style.transform = 'scale(0.8)';
+        setTimeout(() => {
+            if (document.body.contains(modal)) {
+                document.body.removeChild(modal);
+            }
+        }, 300);
+    }
 }
