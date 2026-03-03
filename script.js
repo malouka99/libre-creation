@@ -1,5 +1,105 @@
+// نظام إدارة المستخدمين
+class UserManager {
+    constructor() {
+        this.users = this.loadUsers();
+        this.currentUser = this.getCurrentUser();
+    }
+
+    // تحميل المستخدمين من LocalStorage
+    loadUsers() {
+        const users = localStorage.getItem('libreCreationUsers');
+        return users ? JSON.parse(users) : [];
+    }
+
+    // حفظ المستخدمين في LocalStorage
+    saveUsers() {
+        localStorage.setItem('libreCreationUsers', JSON.stringify(this.users));
+    }
+
+    // تسجيل مستخدم جديد
+    register(userData) {
+        // التحقق إذا كان البريد الإلكتروني موجوداً
+        if (this.users.find(user => user.email === userData.email)) {
+            return { success: false, message: 'البريد الإلكتروني مستخدم بالفعل' };
+        }
+
+        // إنشاء مستخدم جديد
+        const newUser = {
+            id: Date.now().toString(),
+            ...userData,
+            createdAt: new Date().toISOString(),
+            profile: {
+                name: userData.fullName,
+                bio: '',
+                skills: [],
+                portfolio: [],
+                rating: 0,
+                reviews: []
+            }
+        };
+
+        this.users.push(newUser);
+        this.saveUsers();
+        
+        return { success: true, message: 'تم إنشاء الحساب بنجاح', user: newUser };
+    }
+
+    // تسجيل الدخول
+    login(email, password) {
+        const user = this.users.find(u => u.email === email && u.password === password);
+        
+        if (user) {
+            this.setCurrentUser(user);
+            return { success: true, message: 'تم تسجيل الدخول بنجاح', user };
+        }
+        
+        return { success: false, message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' };
+    }
+
+    // تسجيل الخروج
+    logout() {
+        localStorage.removeItem('libreCreationCurrentUser');
+        this.currentUser = null;
+    }
+
+    // حفظ المستخدم الحالي
+    setCurrentUser(user) {
+        localStorage.setItem('libreCreationCurrentUser', JSON.stringify(user));
+        this.currentUser = user;
+    }
+
+    // جلب المستخدم الحالي
+    getCurrentUser() {
+        const user = localStorage.getItem('libreCreationCurrentUser');
+        return user ? JSON.parse(user) : null;
+    }
+
+    // تحديث بيانات المستخدم
+    updateUser(userId, updates) {
+        const userIndex = this.users.findIndex(u => u.id === userId);
+        if (userIndex !== -1) {
+            this.users[userIndex] = { ...this.users[userIndex], ...updates };
+            this.saveUsers();
+            
+            if (this.currentUser && this.currentUser.id === userId) {
+                this.setCurrentUser(this.users[userIndex]);
+            }
+            
+            return { success: true, message: 'تم تحديث البيانات بنجاح' };
+        }
+        
+        return { success: false, message: 'لم يتم العثور على المستخدم' };
+    }
+}
+
+// إنشاء مدير المستخدمين
+const userManager = new UserManager();
+
 // انتظار تحميل الصفحة بالكامل
 document.addEventListener('DOMContentLoaded', function() {
+    
+    // تحديث واجهة المستخدم بناءً على حالة تسجيل الدخول
+    updateUI();
     
     // تأثيرات الحركة السلسة للتنقل
     const navLinks = document.querySelectorAll('.nav-links a');
@@ -37,7 +137,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (rating) {
             rating.style.cursor = 'pointer';
             rating.addEventListener('click', function() {
-                showNotification('شكراً لتقييمك! سيتم حفظه في النظام.');
+                if (userManager.currentUser) {
+                    showNotification('شكراً لتقييمك! سيتم حفظه في النظام.');
+                } else {
+                    showNotification('يجب تسجيل الدخول أولاً للتقييم');
+                    showLoginModal();
+                }
             });
         }
     });
@@ -46,9 +151,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const contactButtons = document.querySelectorAll('.btn-contact');
     contactButtons.forEach(button => {
         button.addEventListener('click', function() {
-            const profileName = this.closest('.talent-profile').querySelector('h3').textContent;
-            showNotification(`جاري فتح نافذة التواصل مع ${profileName}...`);
-            // هنا سيتم إضافة منطق التواصل الفعلي
+            if (userManager.currentUser) {
+                const profileName = this.closest('.talent-profile').querySelector('h3').textContent;
+                showNotification(`جاري فتح نافذة التواصل مع ${profileName}...`);
+                // هنا سيتم إضافة منطق التواصل الفعلي
+            } else {
+                showNotification('يجب تسجيل الدخول للتواصل مع المواهب');
+                showLoginModal();
+            }
         });
     });
 
@@ -56,13 +166,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginBtn = document.querySelector('.btn-login');
     const signupBtn = document.querySelector('.btn-signup');
     
-    loginBtn.addEventListener('click', function() {
-        showLoginModal();
-    });
+    if (loginBtn) {
+        loginBtn.addEventListener('click', function() {
+            showLoginModal();
+        });
+    }
     
-    signupBtn.addEventListener('click', function() {
-        showSignupModal();
-    });
+    if (signupBtn) {
+        signupBtn.addEventListener('click', function() {
+            showSignupModal();
+        });
+    }
 
     // الأزرار الرئيسية
     const primaryBtn = document.querySelector('.btn-primary');
@@ -78,8 +192,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (secondaryBtn) {
         secondaryBtn.addEventListener('click', function() {
-            showNotification('قم بتسجيل الدخول أولاً لعرض أعمالك');
-            showLoginModal();
+            if (userManager.currentUser) {
+                showNotification('جاري فتح صفحتك الشخصية...');
+                showProfileModal();
+            } else {
+                showNotification('قم بتسجيل الدخول أولاً لعرض أعمالك');
+                showLoginModal();
+            }
         });
     }
 
@@ -119,6 +238,36 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(card);
     });
 });
+
+// تحديث واجهة المستخدم
+function updateUI() {
+    const loginBtn = document.querySelector('.btn-login');
+    const signupBtn = document.querySelector('.btn-signup');
+    
+    if (userManager.currentUser) {
+        if (loginBtn) {
+            loginBtn.textContent = 'الملف الشخصي';
+            loginBtn.onclick = showProfileModal;
+        }
+        if (signupBtn) {
+            signupBtn.textContent = 'تسجيل الخروج';
+            signupBtn.onclick = function() {
+                userManager.logout();
+                updateUI();
+                showNotification('تم تسجيل الخروج بنجاح');
+            };
+        }
+    } else {
+        if (loginBtn) {
+            loginBtn.textContent = 'تسجيل الدخول';
+            loginBtn.onclick = showLoginModal;
+        }
+        if (signupBtn) {
+            signupBtn.textContent = 'إنشاء حساب';
+            signupBtn.onclick = showSignupModal;
+        }
+    }
+}
 
 // وظيفة عرض الإشعارات
 function showNotification(message) {
@@ -163,14 +312,14 @@ function showNotification(message) {
 // وظيفة عرض نافذة تسجيل الدخول
 function showLoginModal() {
     const modal = createModal('تسجيل الدخول', `
-        <form class="auth-form">
+        <form class="auth-form" id="loginForm">
             <div class="form-group">
                 <label>البريد الإلكتروني</label>
-                <input type="email" placeholder="أدخل بريدك الإلكتروني" required>
+                <input type="email" id="loginEmail" placeholder="أدخل بريدك الإلكتروني" required>
             </div>
             <div class="form-group">
                 <label>كلمة المرور</label>
-                <input type="password" placeholder="أدخل كلمة المرور" required>
+                <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور" required>
             </div>
             <button type="submit" class="btn-submit">دخول</button>
             <p class="auth-link">ليس لديك حساب؟ <a href="#" onclick="showSignupModal()">إنشاء حساب</a></p>
@@ -178,31 +327,49 @@ function showLoginModal() {
     `);
     
     document.body.appendChild(modal);
+    
+    // إضافة مستمع الحدث للنموذج
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        
+        const result = userManager.login(email, password);
+        
+        if (result.success) {
+            showNotification(result.message);
+            closeModal(modal.querySelector('.modal-close'));
+            updateUI();
+        } else {
+            showNotification(result.message);
+        }
+    });
 }
 
 // وظيفة عرض نافذة إنشاء الحساب
 function showSignupModal() {
     const modal = createModal('إنشاء حساب جديد', `
-        <form class="auth-form">
+        <form class="auth-form" id="signupForm">
             <div class="form-group">
                 <label>الاسم الكامل</label>
-                <input type="text" placeholder="أدخل اسمك الكامل" required>
+                <input type="text" id="signupName" placeholder="أدخل اسمك الكامل" required>
             </div>
             <div class="form-group">
                 <label>البريد الإلكتروني</label>
-                <input type="email" placeholder="أدخل بريدك الإلكتروني" required>
+                <input type="email" id="signupEmail" placeholder="أدخل بريدك الإلكتروني" required>
             </div>
             <div class="form-group">
                 <label>كلمة المرور</label>
-                <input type="password" placeholder="أدخل كلمة المرور" required>
+                <input type="password" id="signupPassword" placeholder="أدخل كلمة المرور" required>
             </div>
             <div class="form-group">
                 <label>تأكيد كلمة المرور</label>
-                <input type="password" placeholder="أعد إدخال كلمة المرور" required>
+                <input type="password" id="signupConfirmPassword" placeholder="أعد إدخال كلمة المرور" required>
             </div>
             <div class="form-group">
                 <label>نوع الحساب</label>
-                <select>
+                <select id="accountType">
                     <option value="talent">موهبة (أعرض خدماتي)</option>
                     <option value="client">عميل (أبحث عن مواهب)</option>
                 </select>
@@ -213,6 +380,114 @@ function showSignupModal() {
     `);
     
     document.body.appendChild(modal);
+    
+    // إضافة مستمع الحدث للنموذج
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const fullName = document.getElementById('signupName').value;
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+        const confirmPassword = document.getElementById('signupConfirmPassword').value;
+        const accountType = document.getElementById('accountType').value;
+        
+        // التحقق من تطابق كلمة المرور
+        if (password !== confirmPassword) {
+            showNotification('كلمات المرور غير متطابقة');
+            return;
+        }
+        
+        // إنشاء الحساب
+        const result = userManager.register({
+            fullName,
+            email,
+            password,
+            accountType
+        });
+        
+        if (result.success) {
+            showNotification(result.message);
+            closeModal(modal.querySelector('.modal-close'));
+            updateUI();
+        } else {
+            showNotification(result.message);
+        }
+    });
+}
+
+// وظيفة عرض نافذة الملف الشخصي
+function showProfileModal() {
+    const user = userManager.currentUser;
+    if (!user) return;
+    
+    const modal = createModal('الملف الشخصي', `
+        <div class="profile-content">
+            <div class="profile-header">
+                <h2>${user.profile.name}</h2>
+                <p class="profile-type">${user.accountType === 'talent' ? 'موهبة' : 'عميل'}</p>
+            </div>
+            <div class="profile-info">
+                <div class="info-item">
+                    <strong>البريد الإلكتروني:</strong>
+                    <span>${user.email}</span>
+                </div>
+                <div class="info-item">
+                    <strong>تاريخ الانضمام:</strong>
+                    <span>${new Date(user.createdAt).toLocaleDateString('ar-SA')}</span>
+                </div>
+                <div class="info-item">
+                    <strong>التقييم:</strong>
+                    <span>⭐ ${user.profile.rating || 0}</span>
+                </div>
+            </div>
+            ${user.accountType === 'talent' ? `
+                <div class="talent-section">
+                    <h3>مهاراتي</h3>
+                    <div class="skills-container">
+                        ${user.profile.skills.length > 0 ? user.profile.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('') : '<p>لم تضف مهارات بعد</p>'}
+                    </div>
+                    <button class="btn-add-skill" onclick="showAddSkillModal()">إضافة مهارة</button>
+                </div>
+            ` : ''}
+        </div>
+    `);
+    
+    document.body.appendChild(modal);
+}
+
+// وظيفة إضافة مهارة
+function showAddSkillModal() {
+    const modal = createModal('إضافة مهارة جديدة', `
+        <form class="auth-form" id="addSkillForm">
+            <div class="form-group">
+                <label>اسم المهارة</label>
+                <input type="text" id="skillName" placeholder="مثال: JavaScript, التصميم, المونتاج" required>
+            </div>
+            <button type="submit" class="btn-submit">إضافة المهارة</button>
+        </form>
+    `);
+    
+    document.body.appendChild(modal);
+    
+    document.getElementById('addSkillForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const skillName = document.getElementById('skillName').value;
+        const user = userManager.currentUser;
+        
+        if (user && user.accountType === 'talent') {
+            const updatedSkills = [...user.profile.skills, skillName];
+            const result = userManager.updateUser(user.id, {
+                profile: { ...user.profile, skills: updatedSkills }
+            });
+            
+            if (result.success) {
+                showNotification('تم إضافة المهارة بنجاح');
+                closeModal(modal.querySelector('.modal-close'));
+                showProfileModal(); // إعادة فتح الملف الشخصي المحدث
+            }
+        }
+    });
 }
 
 // وظيفة إنشاء النوافذ المنبثقة
@@ -353,6 +628,85 @@ function createModal(title, content) {
         
         .auth-link a:hover {
             text-decoration: underline;
+        }
+        
+        .profile-content {
+            text-align: right;
+        }
+        
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .profile-header h2 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .profile-type {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .profile-info {
+            margin-bottom: 2rem;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .info-item strong {
+            color: #333;
+        }
+        
+        .info-item span {
+            color: #666;
+        }
+        
+        .talent-section {
+            margin-top: 2rem;
+        }
+        
+        .talent-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .skill-tag {
+            background: #667eea;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .btn-add-skill {
+            background: #ffd700;
+            color: #333;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-add-skill:hover {
+            background: #ffed4e;
+            transform: translateY(-2px);
         }
     `;
     
