@@ -168,12 +168,17 @@
             appId: "1:123456789012:web:abcdef1234567890abcdef"
         };
 
-        // تهيئة Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        // تهيئة Firebase إذا كانت المكتبات متاحة
+        try {
+            firebase.initializeApp(firebaseConfig);
+            const auth = firebase.auth();
+            const db = firebase.firestore();
+            console.log('Firebase initialized successfully');
+        } catch (error) {
+            console.log('Firebase initialization failed, using LocalStorage fallback:', error);
+        }
     </script>
 
-    <script src="script-firebase.js"></script>
+    <script src="script-hybrid.js"></script>
 </body>
 </html>
