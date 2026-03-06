@@ -384,7 +384,14 @@ function updateUI() {
     if (userManager.currentUser) {
         if (loginBtn) {
             loginBtn.textContent = 'الملف الشخصي';
-            loginBtn.onclick = showProfileModal;
+            loginBtn.onclick = async function() {
+                if (userManager.currentUser) {
+                    // إعادة التوجيه إلى لوحة التحكم
+                    window.location.href = 'dashboard.html';
+                } else {
+                    showLoginModal();
+                }
+            };
         }
         if (signupBtn) {
             signupBtn.textContent = 'تسجيل الخروج';
