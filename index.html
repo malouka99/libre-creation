@@ -6,10 +6,8 @@
     <title>Libre Creation - منصة الإبداع الحر</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=Cairo:wght@400;600;700&family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <!-- Supabase SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <!-- Header -->
@@ -156,29 +154,19 @@
         </div>
     </footer>
 
-    <!-- Firebase Configuration -->
+    <!-- Supabase Configuration -->
     <script>
-        // تكوين Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBkQZ80XlWJx5V9L2qR7m3n4p6s8t9w0x1",
-            authDomain: "libre-creation-db.firebaseapp.com",
-            projectId: "libre-creation-db",
-            storageBucket: "libre-creation-db.appspot.com",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abcdef1234567890abcdef"
-        };
+        // تكوين Supabase
+        const SUPABASE_URL = 'https://cgyqryrkaxcyeqwxoskv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNneXFyeXJrYXhjeWVxd29zayIsImFsZyI6ImhsMjU2IiwiaWF0IjoxNzA0MTA5MjEsImV4cCI6MjA0NDQ4MjkwMX0.vZWqpvP1W-elsvkPiDT-tk3wtqEQI7NwZUET16wJnTU';
 
-        // تهيئة Firebase إذا كانت المكتبات متاحة
-        try {
-            firebase.initializeApp(firebaseConfig);
-            const auth = firebase.auth();
-            const db = firebase.firestore();
-            console.log('Firebase initialized successfully');
-        } catch (error) {
-            console.log('Firebase initialization failed, using LocalStorage fallback:', error);
-        }
+        // تهيئة Supabase
+        const { createClient } = supabase;
+        window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        console.log('Supabase initialized successfully');
     </script>
 
-    <script src="script-hybrid.js"></script>
+    <script src="script-supabase.js"></script>
 </body>
 </html>
