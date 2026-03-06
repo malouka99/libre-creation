@@ -502,7 +502,11 @@ function showLoginModal() {
                     closeModal(closeBtn);
                 }
             }, 1500);
-            updateUI();
+            
+            // إعادة التوجيه التلقائي إلى لوحة التحكم
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 2000);
         } else {
             showNotification(result.message);
         }
