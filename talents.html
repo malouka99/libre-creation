@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المواهب - Libre Creation</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=Cairo:wght@400;600;700&family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Supabase SDK -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        .talents-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .search-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .search-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            color: white;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 0.8rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.9);
+        }
+        
+        .btn-search {
+            padding: 0.8rem 2rem;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+        }
+        
+        .btn-search:hover {
+            transform: translateY(-2px);
+        }
+        
+        .talents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .talent-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .talent-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .talent-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .talent-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-left: 1rem;
+        }
+        
+        .talent-info h3 {
+            margin: 0;
+            color: #333;
+            font-size: 1.2rem;
+        }
+        
+        .talent-category {
+            color: #667eea;
+            font-weight: 500;
+            margin: 0.25rem 0;
+        }
+        
+        .talent-location {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        .talent-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .skill-tag {
+            background: #f0f0f0;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #555;
+        }
+        
+        .talent-description {
+            color: #666;
+            line-height: 1.6;
+            margin: 1rem 0;
+        }
+        
+        .talent-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .talent-rate {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .btn-contact {
+            padding: 0.5rem 1.5rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.3s ease;
+        }
+        
+        .btn-contact:hover {
+            transform: scale(1.05);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        
+        .no-results h3 {
+            margin-bottom: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .talents-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="logo">
+                <h2 class="brand-name">🔥 Libre Creation</h2>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">الرئيسية</a>
+                <a href="talents.html">المواهب</a>
+                <a href="#about">من نحن</a>
+                <a href="#contact">اتصل بنا</a>
+                <button class="btn-login">تسجيل الدخول</button>
+                <button class="btn-signup">إنشاء حساب</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="talents-container">
+        <h1 style="text-align: center; margin-bottom: 2rem; color: #333;">اكتشف أفضل المواهب لمشروعك</h1>
+        
+        <!-- Search Section -->
+        <section class="search-section">
+            <form class="search-form" id="searchForm">
+                <div class="form-group">
+                    <label for="searchInput">البحث عن موهبة</label>
+                    <input type="text" id="searchInput" placeholder="اكتب اسم الموهبة أو المهارة...">
+                </div>
+                <div class="form-group">
+                    <label for="categoryFilter">نوع الموهبة</label>
+                    <select id="categoryFilter">
+                        <option value="">جميع الفئات</option>
+                        <option value="programming">البرمجة</option>
+                        <option value="design">التصميم</option>
+                        <option value="writing">الكتابة</option>
+                        <option value="marketing">التسويق</option>
+                        <option value="video">الفيديو والمونتاج</option>
+                        <option value="translation">الترجمة</option>
+                        <option value="voice">الصوتيات</option>
+                        <option value="other">أخرى</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-search">🔍 بحث</button>
+            </form>
+        </section>
+
+        <!-- Talents Grid -->
+        <section class="talents-grid" id="talentsGrid">
+            <!-- Talents will be loaded here dynamically -->
+        </section>
+
+        <!-- No Results Message -->
+        <div class="no-results" id="noResults" style="display: none;">
+            <h3>😔 لم يتم العثور على مواهب</h3>
+            <p>جرب تغيير معايير البحث أو الفلتر</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Libre Creation</h3>
+                <p>منصة الإبداع الحر - نربط المواهب بالفرص</p>
+            </div>
+            <div class="footer-section">
+                <h4>روابط سريعة</h4>
+                <ul>
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="talents.html">المواهب</a></li>
+                    <li><a href="#about">من نحن</a></li>
+                    <li><a href="#contact">اتصل بنا</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>تواصل معنا</h4>
+                <div class="contact-info">
+                    <p>📧 chakermalak99@gmail.com</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link">📘</a>
+                        <a href="#" class="social-link">🐦</a>
+                        <a href="#" class="social-link">📷</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Libre Creation. جميع الحقوق محفوظة.</p>
+        </div>
+    </footer>
+
+    <!-- Supabase Configuration -->
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://cgyqryrkaxcyeqwxoskv.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNneXFyeXJrYXhjeWVxd3hvc2t2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQxMTAzMjcsImV4cCI6MjA0OTY4NjMyN30.5fF2wA6R8P3p2sL7qK9Q4r3wN8mX1tZ7vY2k6jF3hE8';
+
+        const { createClient } = supabase;
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    </script>
+
+    <!-- Main Script -->
+    <script src="talents.js"></script>
+</body>
+</html>
