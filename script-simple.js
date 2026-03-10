@@ -20,47 +20,16 @@ class AuthManager {
         this._init();
     }
 
-    // ── التهيئة ──
+    // ── التهيئة — يستخدم LocalStorage دائماً لأن مفتاح Supabase غير مُعدّ بعد ──
     async _init() {
-        try {
-            // محاولة تهيئة Supabase
-            if (typeof window.supabase !== 'undefined' && window.supabase.createClient) {
-                this.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            } else if (typeof createClient !== 'undefined') {
-                this.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            }
+        // استخدام LocalStorage مباشرةً (آمن ويعمل دون إنترنت)
+        this.mode        = 'local';
+        this.currentUser = this._localGetCurrentUser();
+        console.log('✅ النظام جاهز — الوضع: محلي (LocalStorage)');
 
-            if (this.supabase) {
-                // اختبار الاتصال
-                const { data, error } = await this.supabase.auth.getSession();
-                if (!error) {
-                    this.mode        = 'supabase';
-                    this.currentUser = data?.session?.user || null;
-
-                    // مستمع تغيير حالة المصادقة
-                    this.supabase.auth.onAuthStateChange((event, session) => {
-                        this.currentUser = session?.user || null;
-                        updateUI();
-                        if (event === 'SIGNED_IN' && this.currentUser) {
-                            setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
-                        }
-                    });
-
-                    console.log('✅ Supabase متصل بنجاح');
-                } else {
-                    throw new Error(error.message);
-                }
-            } else {
-                throw new Error('Supabase SDK غير محمّل');
-            }
-        } catch (err) {
-            console.warn('⚠️ تعذّر الاتصال بـ Supabase، سيتم استخدام LocalStorage:', err.message);
-            this.mode        = 'local';
-            this.currentUser = this._localGetCurrentUser();
-        }
-
-        // تحديث الواجهة بعد التهيئة
-        updateUI();
+        // تحديث الواجهة بعد تعريف authManager
+        // نستخدم setTimeout لضمان أن authManager مُعرَّف بالكامل أولاً
+        setTimeout(() => updateUI(), 0);
     }
 
     // ══════════════════════════════════════════════════════
