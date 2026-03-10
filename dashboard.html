@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم - Libre Creation</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=Cairo:wght@400;600;700&family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <!-- Supabase SDK -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -372,7 +373,9 @@
     <header class="header">
         <nav class="navbar">
             <div class="logo">
-                <h2 class="brand-name">🎨 Libre Creation</h2>
+                <a href="index.html" style="display:flex;align-items:center;gap:.6rem;text-decoration:none">
+                    <img src="logo.png" alt="Libre Creation" style="height:45px;width:auto;object-fit:contain">
+                </a>
             </div>
             <div class="nav-links">
                 <a href="index.html">الرئيسية</a>
@@ -397,15 +400,6 @@
             <!-- Contents will be inserted here -->
         </div>
     </div>
-
-    <!-- Supabase Configuration -->
-    <script>
-        const SUPABASE_URL = 'https://cgyqryrkaxcyeqwxoskv.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNneXFyeXJrYXhjeWVxd29zayIsImFsZyI6ImhsMjU2IiwiaWF0IjoxNzA0MTA5MjEsImV4cCI6MjA0NDQ4MjkwMX0.vZWqpvP1W-elsvkPiDT-tk3wtqEQI7NwZUET16wJnTU';
-        
-        const { createClient } = supabase;
-        window.supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    </script>
 
     <script src="dashboard.js"></script>
 </body>
